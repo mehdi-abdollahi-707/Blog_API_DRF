@@ -19,13 +19,11 @@ class UserViewSet(viewsets.ViewSet):
         if self.action in ['retrieve','partial_update','destroy']:
             return [IsAuthenticated(),]
 
-
-    def create(self , request):
+    def create(self, request):
         srz_data = self.serializer_class(data=request.data)
         if srz_data.is_valid():
             srz_data.save()
-            return Response(srz_data.data, status=status.HTTP_201_CREATED)
-        return Response(srz_data.errors , status=status.HTTP_400_BAD_REQUEST)
+        return Response(srz_data.data , status=status.HTTP_201_CREATED)
 
     def retrieve(self , request , pk=None):
         user = get_object_or_404(User , pk=pk)
@@ -36,12 +34,17 @@ class UserViewSet(viewsets.ViewSet):
 
     def partial_update(self , request , pk=None):
         user = get_object_or_404(User, pk=pk)
-        srz_data = self.serializer_class(instance=user , data=request.data , partial=True)
-        if srz_data.is_valid():
-            srz_data.save()
-            return Response(srz_data.data, status=status.HTTP_202_ACCEPTED)
-        return Response(srz_data.errors , status=status.HTTP_400_BAD_REQUEST)
+        if request.user == user:
+            srz_data = self.serializer_class(instance=user , data=request.data , partial=True)
+            if srz_data.is_valid():
+                srz_data.save()
+                return Response(srz_data.data, status=status.HTTP_202_ACCEPTED)
+            return Response(srz_data.errors , status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message' : 'You are not the owner'})
 
     def destroy(self , request , pk=None):
-        user = get_object_or_404(User, pk=pk).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        user = get_object_or_404(User, pk=pk)
+        if request.user == user:
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'message' : 'You are not the owner'})
