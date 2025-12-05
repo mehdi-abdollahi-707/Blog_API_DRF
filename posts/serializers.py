@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import PostImage , Post
-from django.template.defaultfilters import slugify
-import random
+from django.utils.text import slugify
+
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -9,20 +9,26 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = '__all__'
 
+
+
+
 class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('title' , 'body' , 'status')
+        fields = ('title', 'body', 'status')
 
     def create(self, validated_data):
         title = validated_data['title']
-        validated_data['slug'] = slugify(title)
+        base_slug = slugify(title)
+        slug = base_slug
+        counter = 1
+
+        # Make slug unique
+        while Post.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        validated_data['slug'] = slug
         return Post.objects.create(**validated_data)
 
-    def validate_title(self, value):
-        if Post.objects.filter(title__icontains=value).exists():
-            random_code = random.randint(1,10000000)
-            value = f'{value} - ({random_code})'
-            return value
-        return value
 
