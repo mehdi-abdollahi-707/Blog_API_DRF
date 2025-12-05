@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .serializers import PostSerializer , PostCreateSerializer
+from .serializers import PostSerializer , PostCreateSerializer , PostUpdateSerializer
 from rest_framework.views import APIView
 from .models import Post
 from rest_framework import status
@@ -42,4 +42,28 @@ class PostCreateView(APIView):
             post = serializer.save(user=request.user)
             return Response(self.serializer_class(post).data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class PostUpdateView(APIView):
+    serializer_class = PostUpdateSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def put(self , request , pk):
+        post = get_object_or_404(Post , pk=pk)
+        srz_data = self.serializer_class(instance=post , data=request.data , partial=True)
+        self.check_object_permissions(request,post)
+        if srz_data.is_valid():
+            srz_data.save()
+            return Response(srz_data.data,status=status.HTTP_200_OK)
+        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
 
