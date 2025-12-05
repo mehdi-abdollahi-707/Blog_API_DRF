@@ -60,7 +60,14 @@ class PostUpdateView(APIView):
 
 
 
+class PostDeleteView(APIView):
+    permission_classes = (IsOwnerOrReadOnly,)
 
+    def delete(self , request , pk):
+        post = get_object_or_404(Post , pk=pk)
+        self.check_object_permissions(request,post)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
