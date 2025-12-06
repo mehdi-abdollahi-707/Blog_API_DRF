@@ -5,10 +5,15 @@ from django.utils.text import slugify
 
 
 class PostSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
         fields = '__all__'
 
+    def get_images(self, obj):
+        result = obj.images.all()
+        return PostImageSerializer(instance=result, many=True).data
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -60,7 +65,10 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
-
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ('id' , 'image')
 
 
 

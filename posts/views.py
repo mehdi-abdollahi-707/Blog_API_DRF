@@ -1,12 +1,12 @@
 from rest_framework.response import Response
 from .serializers import PostSerializer , PostCreateSerializer , PostUpdateSerializer
 from rest_framework.views import APIView
-from .models import Post
+from .models import Post , PostImage
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.parsers import MultiPartParser
 
 
 
@@ -70,6 +70,29 @@ class PostDeleteView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class PostImageUploadView(APIView):
+    parser_classes = [MultiPartParser]
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        if not request.user == post.user:
+            return Response({"message" : "You are not the owner"}, status=status.HTTP_401_UNAUTHORIZED)
+        image = request.FILES.get("image")
+        if not image:
+            return Response({"error": "Image is required"}, status=400)
+        PostImage.objects.create(post=post, image=image)
+        return Response({"message": "Image uploaded"}, status=201)
+
+
+class PostImageDeleteView(APIView):
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def delete(self , request , pk):
+        image = get_object_or_404(PostImage , pk=pk)
+        self.check_object_permissions(request,image.post)
+        image.delete()
+        return Response({"message": "Image deleted"}, status=status.HTTP_204_NO_CONTENT)
 
 
 
