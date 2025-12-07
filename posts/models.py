@@ -32,7 +32,7 @@ class Comment(models.Model):
         ordering = ["created"]
 
     def __str__(self):
-        return f"{self.user} - {self.body[:20]}"
+        return f"{self.id} -{self.user} - {self.body[:20]}"
 
 
 

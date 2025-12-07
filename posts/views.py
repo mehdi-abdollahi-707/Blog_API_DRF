@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from .serializers import (PostSerializer , PostCreateSerializer ,PostUpdateSerializer,
                           PostListSerializer,CommentCreateSerializer)
 from rest_framework.views import APIView
-from .models import Post , PostImage
+from .models import Post , PostImage , Comment
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from permissions import IsOwnerOrReadOnly
@@ -104,5 +104,27 @@ class CommentCreateView(APIView):
             srz_data.save()
             return Response(srz_data.data,status=status.HTTP_201_CREATED)
         return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentUpdateView(APIView):
+    serializer_class = CommentCreateSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def put(self , request , pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        srz_data = self.serializer_class(instance=comment , data=request.data , partial=True)
+        self.check_object_permissions(request,comment)
+        if srz_data.is_valid():
+            srz_data.save()
+            return Response(srz_data.data,status=status.HTTP_200_OK)
+        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
 
 
