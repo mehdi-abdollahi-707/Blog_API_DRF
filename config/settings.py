@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts.apps.AccountsConfig',
     'posts.apps.PostsConfig',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,18 @@ SIMPLE_JWT = {
 }
 
 
+### Arvan Cloud Storages ###
+STORAGES = {
+"default": {
+"BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+"OPTIONS": {
+"access_key": "d47b19a2-268b-4029-abc1-25d15ee9fbdd",
+"secret_key": "a9340b3c01b368eb11ffa82849bbbd42222f91980797e40a7aeb66d56bde88b3",
+"bucket_name": "api-blog-project",
+"endpoint_url": "https://s3.ir-thr-at1.arvanstorage.ir",
+},
+},
+"staticfiles": {
+"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+},
+}
