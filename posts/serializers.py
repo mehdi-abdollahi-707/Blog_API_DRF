@@ -98,3 +98,14 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('body',)
+
+    def create(self , validated_data):
+        new_comment = Comment(**validated_data)
+        new_comment.post = self.context['post']
+        new_comment.user = self.context['user']
+        new_comment.save()
+        return new_comment
