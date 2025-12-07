@@ -1,11 +1,20 @@
 from rest_framework import serializers
-from .models import PostImage , Post
+from .models import PostImage , Post , Comment
 from django.utils.text import slugify
+
+
+class PostListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('user' , 'title' , 'body')
+
+
 
 
 
 class PostSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -14,6 +23,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         result = obj.images.all()
         return PostImageSerializer(instance=result, many=True).data
+
+    def get_comments(self, obj):
+        result = obj.comments.all()
+        return CommentSerializer(instance=result, many=True).data
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -72,8 +85,16 @@ class PostImageSerializer(serializers.ModelSerializer):
 
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Comment
+        fields = ('post' , 'user' , 'body' ,'replies')
 
+    def get_replies(self, obj):
+        result = obj.replies.all()
+        return CommentSerializer(instance=result, many=True).data
 
 
 

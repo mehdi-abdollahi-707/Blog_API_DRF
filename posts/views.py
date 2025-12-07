@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .serializers import PostSerializer , PostCreateSerializer , PostUpdateSerializer
+from .serializers import PostSerializer , PostCreateSerializer , PostUpdateSerializer , PostListSerializer
 from rest_framework.views import APIView
 from .models import Post , PostImage
 from rest_framework import status
@@ -10,14 +10,11 @@ from rest_framework.parsers import MultiPartParser
 
 
 
-
-
-
 class PostListView(APIView):
-    serializer_class = PostSerializer
+    serializer_class = PostListSerializer
 
     def get(self , request):
-        posts = Post.objects.all()
+        posts = Post.objects.filter(status='published')
         srz_data = self.serializer_class(instance=posts, many=True)
         return Response(data= srz_data.data , status=status.HTTP_200_OK)
 

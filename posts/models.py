@@ -20,3 +20,29 @@ class PostImage(models.Model):
     image = models.ImageField(upload_to="post_images/")
 
 
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE , related_name="comments")
+    parent = models.ForeignKey("self",on_delete=models.CASCADE,null=True,blank=True,related_name="replies")
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created"]
+
+    def __str__(self):
+        return f"{self.user} - {self.body[:20]}"
+
+
+
+
+
+
+
+
+
+
+
+
+
