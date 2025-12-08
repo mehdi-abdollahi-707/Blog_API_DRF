@@ -7,7 +7,7 @@ from .models import Post , PostImage , Comment
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from permissions import IsOwnerOrReadOnly
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser
 
 
@@ -27,8 +27,17 @@ class PostDetailView(APIView):
 
     def get(self, request, pk):
         post = get_object_or_404(Post , pk=pk)
-        srz_data = self.serializer_class(instance=post)
-        return Response(data= srz_data.data , status=status.HTTP_200_OK)
+        if post.status == 'published':
+            srz_data = self.serializer_class(instance=post)
+            return Response(data= srz_data.data , status=status.HTTP_200_OK)
+        else:
+            if request.user == post.user:
+                srz_data = self.serializer_class(instance=post)
+                return Response(data=srz_data.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"message" : "Not found"} , status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 class PostCreateView(APIView):
