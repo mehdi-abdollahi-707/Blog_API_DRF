@@ -134,20 +134,3 @@ class ReplyCreateSerializer(serializers.ModelSerializer):
         new_comment.save()
         return new_comment
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

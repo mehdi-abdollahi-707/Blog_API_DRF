@@ -147,11 +147,18 @@ class ReplyCreateView(APIView):
 
 
 
+class ReplyUpdateView(APIView):
+    serializer_class = ReplyCreateSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
 
-
-
-
-
+    def put(self , request , pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        srz_data = self.serializer_class(instance=comment , data=request.data , partial=True)
+        self.check_object_permissions(request , comment)
+        if srz_data.is_valid():
+            srz_data.save()
+            return Response(srz_data.data,status=status.HTTP_202_ACCEPTED)
+        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 
