@@ -26,7 +26,11 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         result = obj.comments.all()
-        return CommentSerializer(instance=result, many=True).data
+        comments = []
+        for c in result:
+            if c.parent is None:
+                comments.append(c)
+        return CommentSerializer(instance=comments, many=True).data
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -94,7 +98,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_replies(self, obj):
         result = obj.replies.all()
-        return CommentSerializer(instance=result, many=True).data
+        return ReplySerializer(instance=result, many=True).data
 
 
 
@@ -109,4 +113,41 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         new_comment.user = self.context['user']
         new_comment.save()
         return new_comment
+
+class ReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('post','user','body')
+
+
+
+class ReplyCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('body',)
+
+    def create(self , validated_data):
+        new_comment = Comment(**validated_data)
+        new_comment.post = self.context['post']
+        new_comment.user = self.context['user']
+        new_comment.parent = self.context['comment']
+        new_comment.save()
+        return new_comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

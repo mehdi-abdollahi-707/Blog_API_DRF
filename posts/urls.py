@@ -13,4 +13,5 @@ urlpatterns = [
     path('comment/create/<int:pk>/' , views.CommentCreateView.as_view() , name='comment_create'),
     path('comment/update/<int:pk>/' , views.CommentUpdateView.as_view() , name='comment_update'),
     path('comment/delete/<int:pk>/' , views.CommentDeleteView.as_view() , name='comment_delete'),
+    path('reply/create/<int:post_id>/<int:comment_id>/' , views.ReplyCreateView.as_view() , name='reply_create'),
 ]

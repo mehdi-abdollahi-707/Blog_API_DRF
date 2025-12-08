@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from .serializers import (PostSerializer , PostCreateSerializer ,PostUpdateSerializer,
-                          PostListSerializer,CommentCreateSerializer)
+                          PostListSerializer,CommentCreateSerializer, ReplyCreateSerializer)
 from rest_framework.views import APIView
 from .models import Post , PostImage , Comment
 from rest_framework import status
@@ -22,7 +22,7 @@ class PostListView(APIView):
 
 class PostDetailView(APIView):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+
 
     def get(self, request, pk):
         post = get_object_or_404(Post , pk=pk)
@@ -128,6 +128,28 @@ class CommentDeleteView(APIView):
         self.check_object_permissions(request,comment)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ReplyCreateView(APIView):
+    serializer_class = ReplyCreateSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self , request , post_id , comment_id):
+        post = get_object_or_404(Post, pk=post_id)
+        comment = get_object_or_404(Comment, pk=comment_id)
+        srz_data = self.serializer_class(data=request.data , context={'post':post,
+                                                                      'user': request.user,
+                                                                      'comment':comment,})
+        if srz_data.is_valid():
+            srz_data.save()
+            return Response(srz_data.data , status=status.HTTP_201_CREATED)
+        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 
 
 
