@@ -1,3 +1,4 @@
+from django.template.defaulttags import comment
 from rest_framework.response import Response
 from .serializers import (PostSerializer , PostCreateSerializer ,PostUpdateSerializer,
                           PostListSerializer,CommentCreateSerializer, ReplyCreateSerializer)
@@ -161,6 +162,13 @@ class ReplyUpdateView(APIView):
         return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
+class ReplyDeleteView(APIView):
+    permission_classes = (IsOwnerOrReadOnly,)
 
+    def delete(self , request , pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        self.check_object_permissions(request,comment)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
