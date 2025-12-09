@@ -110,11 +110,13 @@ class CommentCreateView(APIView):
 
     def post(self , request , pk):
         post = get_object_or_404(Post, pk=pk)
-        srz_data = self.serializer_class(data=request.data , context={'post':post , 'user':request.user})
-        if srz_data.is_valid():
-            srz_data.save()
-            return Response(srz_data.data,status=status.HTTP_201_CREATED)
-        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        if post.status == 'published':
+            srz_data = self.serializer_class(data=request.data , context={'post':post , 'user':request.user})
+            if srz_data.is_valid():
+                srz_data.save()
+                return Response(srz_data.data,status=status.HTTP_201_CREATED)
+            return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message" : "Not found"} , status=status.HTTP_404_NOT_FOUND)
 
 
 class CommentUpdateView(APIView):
@@ -188,11 +190,13 @@ class LikeCreateView(APIView):
 
     def post(self , request , pk):
         post = get_object_or_404(Post, pk=pk)
-        srz_data = self.serializer_classes(data=request.data , context={'post':post , 'user':request.user})
-        if srz_data.is_valid():
-            srz_data.save()
-            return Response({"message" : "You liked this post."}, status=status.HTTP_201_CREATED)
-        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        if post.status == "published":
+            srz_data = self.serializer_classes(data=request.data , context={'post':post , 'user':request.user})
+            if srz_data.is_valid():
+                srz_data.save()
+                return Response({"message" : "You liked this post."}, status=status.HTTP_201_CREATED)
+            return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message" : "Not found"} , status=status.HTTP_404_NOT_FOUND)
 
 
 class LikeDeleteView(APIView):
