@@ -1,9 +1,10 @@
 from django.template.defaulttags import comment
 from rest_framework.response import Response
 from .serializers import (PostSerializer , PostCreateSerializer ,PostUpdateSerializer,
-                          PostListSerializer,CommentCreateSerializer, ReplyCreateSerializer)
+                          PostListSerializer,CommentCreateSerializer, ReplyCreateSerializer,
+                          LikeSerializer,)
 from rest_framework.views import APIView
-from .models import Post , PostImage , Comment
+from .models import Post , PostImage , Comment , Like
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from permissions import IsOwnerOrReadOnly
@@ -179,5 +180,32 @@ class ReplyDeleteView(APIView):
         self.check_object_permissions(request,comment)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LikeCreateView(APIView):
+    serializer_classes = LikeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self , request , pk):
+        post = get_object_or_404(Post, pk=pk)
+        srz_data = self.serializer_classes(data=request.data , context={'post':post , 'user':request.user})
+        if srz_data.is_valid():
+            srz_data.save()
+            return Response({"message" : "You liked this post."}, status=status.HTTP_201_CREATED)
+        return Response(srz_data.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+class LikeDeleteView(APIView):
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def delete(self , request , pk):
+        like = get_object_or_404(Like , pk=pk)
+        self.check_object_permissions(request,like)
+        like.delete()
+        return Response({"message" : "Delete Like successfully"} ,status=status.HTTP_204_NO_CONTENT)
+
+
+
+
 
 

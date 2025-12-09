@@ -1,15 +1,16 @@
 from rest_framework import serializers
-from .models import PostImage , Post , Comment
+from .models import PostImage , Post , Comment , Like
 from django.utils.text import slugify
+from rest_framework.validators import ValidationError
+
+
+
 
 
 class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('user' , 'title' , 'body')
-
-
-
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -133,4 +134,34 @@ class ReplyCreateSerializer(serializers.ModelSerializer):
         new_comment.parent = self.context['comment']
         new_comment.save()
         return new_comment
+
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ('post', 'user')
+        read_only_fields = ('post', 'user')
+
+    def create(self, validated_data):
+        post = self.context['post']
+        user = self.context['user']
+        if Like.objects.filter(post=post, user=user).exists():
+            raise ValidationError("You already liked this post.")
+        return Like.objects.create(post=post, user=user)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
