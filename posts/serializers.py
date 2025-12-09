@@ -16,6 +16,7 @@ class PostListSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -32,6 +33,10 @@ class PostSerializer(serializers.ModelSerializer):
             if c.parent is None:
                 comments.append(c)
         return CommentSerializer(instance=comments, many=True).data
+
+    def get_likes(self, obj):
+        result = obj.likes.all().count()
+        return result
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
