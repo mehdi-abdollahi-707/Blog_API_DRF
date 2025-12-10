@@ -10,16 +10,18 @@ from django.shortcuts import get_object_or_404
 from permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser
-
+from .pagination import PostPagination
 
 
 class PostListView(APIView):
     serializer_class = PostListSerializer
 
-    def get(self , request):
+    def get(self, request):
         posts = Post.objects.filter(status='published')
-        srz_data = self.serializer_class(instance=posts, many=True)
-        return Response(data= srz_data.data , status=status.HTTP_200_OK)
+        paginator = PostPagination()
+        paginated_posts = paginator.paginate_queryset(posts, request)
+        serializer = self.serializer_class(paginated_posts, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class PostDetailView(APIView):
